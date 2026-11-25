@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Pong con Dedicatoria</title>
+<style>
+    body { background: #000; margin: 0; overflow: hidden; }
+    canvas { display: block; margin: auto; background: #111; }
+</style>
+</head>
+<body>
+<canvas id="gameCanvas" width="800" height="500"></canvas>
+
+<script>
+// --- Configuración del Canvas ---
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
+
+// --- Elementos del juego ---
+let paddleHeight = 80;
+let paddleWidth = 10;
+let playerY = canvas.height / 2 - paddleHeight / 2;
+let aiY = canvas.height / 2 - paddleHeight / 2;
+
+let ballX = canvas.width / 2;
+let ballY = canvas.height / 2;
+let ballSize = 10;
+let ballSpeedX = 5;
+let ballSpeedY = 4;
+
+// --- Control del jugador ---
+document.addEventListener("mousemove", (e) => {
+    playerY = e.clientY - paddleHeight / 2;
+});
+
+// --- Lógica del juego ---
+function update() {
+    // Movimiento de la pelota
+    ballX += ballSpeedX;
+    ballY += ballSpeedY;
+
+    // Rebote vertical
+    if (ballY <= 0 || ballY >= canvas.height - ballSize) {
+        ballSpeedY *= -1;
+    }
+
+    // Rebote con paleta del jugador
+    if (ballX <= paddleWidth &&
+        ballY + ballSize >= playerY &&
+        ballY <= playerY + paddleHeight) {
+        ballSpeedX *= -1;
+    }
+
+    // Rebote con paleta IA
+    if (ballX + ballSize >= canvas.width - paddleWidth &&
+        ballY + ballSize >= aiY &&
+        ballY <= aiY + paddleHeight) {
+        ballSpeedX *= -1;
+    }
+
+    // IA sigue la pelota
+    aiY += (ballY - aiY - paddleHeight / 2) * 0.1;
+
+    // Reinicio si la pelota sale
+    if (ballX < 0 || ballX > canvas.width) {
+        ballX = canvas.width / 2;
+        ballY = canvas.height / 2;
+        ballSpeedX *= -1;
+    }
+}
+
+// --- Dibujar ---
+function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Pelota
+    ctx.fillStyle = "white";
+    ctx.fillRect(ballX, ballY, ballSize, ballSize);
+
+    // Paleta jugador
+    ctx.fillRect(0, playerY, paddleWidth, paddleHeight);
+
+    // Paleta IA
+    ctx.fillRect(canvas.width - paddleWidth, aiY, paddleWidth, paddleHeight);
+
+    // Línea central
+    ctx.fillStyle = "gray";
+    ctx.fillRect(canvas.width / 2 - 2, 0, 4, canvas.height);
+
+    // --- Dedicatoria dentro del juego ---
+    ctx.font = "18px Arial";
+    ctx.fillStyle = "white";
+    ctx.fillText("Dedicado al creador original del mashup", canvas.width - 350, canvas.height - 20);
+}
+
+// --- Bucle principal ---
+function gameLoop() {
+    update();
+    draw();
+    requestAnimationFrame(gameLoop);
+}
+
+gameLoop();
+</script>
+</body>
+</html>
